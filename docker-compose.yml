@@ -1,0 +1,19 @@
+services:
+  app:
+    container_name: chat_bot_app
+    image: chat_bot_image
+    env_file:
+      - .env
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    driver: bridge
+    name: bot_network

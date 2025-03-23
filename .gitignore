@@ -1,2 +1,8 @@
+/backups/*
 /venv
+/logs
 __pycache__/
+chat_bot_db.sql
+
+!backups/.gitkeep
+!backups/

@@ -1,0 +1,20 @@
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "${MYSQL_DBPORT}:${MYSQL_DBPORT}"
+    volumes:
+      - ./backups:/backups 
+      - ./logs/mysql:/var/lib/mysql
+      - ./scripts/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    driver: bridge
+    name: bot_network
