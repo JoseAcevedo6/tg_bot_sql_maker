@@ -70,4 +70,4 @@ python manage.py createsuperuser
 
 **Inicia sesión con las credenciales configuradas y gestiona la base de datos desde la interfaz.** 🚀
 
-## Recuerda que los comandos y scripts debes ejecutarlos desde la raíz del proyecto. 💭
+## Recuerda que los comandos y scripts deben ser ejecutados desde la raíz del proyecto. 💭
