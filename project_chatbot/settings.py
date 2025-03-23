@@ -11,21 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from pydantic_settings  import BaseSettings
 from typing import Literal
 import os
 
-
-class Settings(BaseSettings):
-
-    development: bool = 'true' in os.getenv('DEVELOPMENT', 'true')
-    mysql_host: str = os.getenv('MYSQL_HOST', 'localhost')
-    mysql_user: str = os.getenv('MYSQL_USER', 'root')
-    mysql_password: str = os.getenv('MYSQL_PASSWORD', '1224')
-    mysql_db_name: str = os.getenv('MYSQL_DBNAME', 'bot_hibrido')
-    mysql_db_port: str = os.getenv('MYSQL_DBPORT', "3306")
-
-settings = Settings()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +28,7 @@ SECRET_KEY = 'django-insecure-04*q$+z+t9)c02inv%1%5sxvcuvg#3l@m%)gq)1c9-vh%#&bwu
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = True if settings.development else False
+DEBUG = True if 'true' in os.getenv('DEVELOPMENT', 'true') else False
 
 ALLOWED_HOSTS = []
 
@@ -94,11 +82,11 @@ WSGI_APPLICATION = 'project_chatbot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': settings.mysql_db_name,
-        'USER': settings.mysql_user,
-        'PASSWORD': settings.mysql_password,
-        'HOST': settings.mysql_host,
-        'PORT': settings.mysql_db_port,
+        'NAME': os.getenv('MYSQL_DATABASE'),
+        'USER': os.getenv('MYSQL_USER'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+        'HOST': os.getenv('MYSQL_HOST'),
+        'PORT':  os.getenv('MYSQL_DBPORT'),
     }
 }
 
