@@ -4,15 +4,18 @@ services:
     image: mysql:8.0
     env_file:
       - .env
-    restart: always
+    restart: on-failure # always # dejar always cuando este en el servidor
     ports:
       - "${MYSQL_DBPORT}:${MYSQL_DBPORT}"
     volumes:
       - ./backups:/backups 
-      - ./logs/mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./scripts/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     networks:
       - bot_network
+
+volumes:
+  mysql_data:
 
 networks:
   bot_network:

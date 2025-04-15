@@ -28,6 +28,53 @@ class Client(models.Model):
         verbose_name = "Client"
         verbose_name_plural = "Clients"
 
+    def __str__(self):
+        return self.business_name
+
+
+class DatabaseDriver(models.Model):
+
+    description = models.CharField(max_length=100)
+    driver = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.description
+
+    class Meta:
+        verbose_name = "Database Driver"
+        verbose_name_plural = "Database Drivers"
+
+
+class ExternalDatabase(models.Model):
+
+    client = models.OneToOneField(Client, related_name="external_db", on_delete=models.CASCADE)
+    db_driver = models.ForeignKey(DatabaseDriver, on_delete=models.CASCADE)
+    host = models.CharField(max_length=255)
+    port = models.IntegerField()
+    username = models.CharField(max_length=100)
+    password = models.CharField(max_length=255)
+    database = models.CharField(max_length=255)
+    driver = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "External Database"
+        verbose_name_plural = "External Databases"
+
+    def get_sqlalchemy_params(self) -> dict:
+        data = {
+            "drivername": self.db_driver.driver,
+            "username": self.username,
+            "password": self.password,
+            "host": self.host,
+            "port": self.port,
+            "database": self.database,
+        }
+
+        if self.driver:
+            data["query"] = {"driver": self.driver}
+
+        return data
+
 
 class Context(models.Model):
 

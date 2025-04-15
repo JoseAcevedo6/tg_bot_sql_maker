@@ -11,6 +11,6 @@ done
 echo "✅ MySQL está listo."
 
 # Iniciar el ChatBot solo cuando MySQL esté listo
-docker compose up -d
+docker compose -f docker-compose.yml up -d
 
 echo "🚀 Base de datos y ChatBot listos."
