@@ -1,0 +1,87 @@
+{
+    "database": "fakedb_to_test",
+    "tables": {
+        "Clientes": {
+            "columns": {
+                "IdCliente": {"type": "INT", "primary_key": true, "auto_increment": true},
+                "CUIT": {"type": "VARCHAR(20)"},
+                "FechaAlta": {"type": "DATE"},
+                "RazonSocial": {"type": "VARCHAR(255)"},
+                "Domicilio": {"type": "VARCHAR(255)"}
+            },
+            "primary_key": "IdCliente",
+            "foreign_keys": []
+        },
+        "Proveedores": {
+            "columns": {
+                "IdProveedor": {"type": "INT", "primary_key": true, "auto_increment": true},
+                "CUIT": {"type": "VARCHAR(20)"},
+                "FechaAlta": {"type": "DATE"},
+                "RazonSocial": {"type": "VARCHAR(255)"},
+                "Domicilio": {"type": "VARCHAR(255)"}
+            },
+            "primary_key": "IdProveedor",
+            "foreign_keys": []
+        },
+        "Articulos": {
+            "columns": {
+                "IdArticulo": {"type": "INT", "primary_key": true},
+                "Descripcion": {"type": "VARCHAR(255)"}
+            },
+            "primary_key": "IdArticulo",
+            "foreign_keys": []
+        },
+        "FacturasClientes": {
+            "columns": {
+                "NumeroFactura": {"type": "INT", "primary_key": true},
+                "IdCliente": {"type": "INT", "foreign_key": {"references": "Clientes", "field": "IdCliente"}},
+                "FechaFactura": {"type": "DATE"}
+            },
+            "primary_key": "NumeroFactura",
+            "foreign_keys": [
+                {"field": "IdCliente", "references": "Clientes", "field_referenced": "IdCliente"}
+            ]
+        },
+        "FacturasProveedores": {
+            "columns": {
+                "NumeroFacturaProveedor": {"type": "INT", "primary_key": true},
+                "IdProveedor": {"type": "INT", "foreign_key": {"references": "Proveedores", "field": "IdProveedor"}},
+                "FechaFactura": {"type": "DATE"}
+            },
+            "primary_key": "NumeroFacturaProveedor",
+            "foreign_keys": [
+                {"field": "IdProveedor", "references": "Proveedores", "field_referenced": "IdProveedor"}
+            ]
+        },
+        "RenglonesFacturasClientes": {
+            "columns": {
+                "Renglon": {"type": "INT", "primary_key": true},
+                "NumeroFacturaCliente": {"type": "INT", "foreign_key": {"references": "FacturasClientes", "field": "NumeroFactura"}},
+                "IdArticulo": {"type": "INT", "foreign_key": {"references": "Articulos", "field": "IdArticulo"}},
+                "Cantidad": {"type": "INT"},
+                "PrecioUnitario": {"type": "FLOAT"}
+            },
+            "primary_key": "Renglon",
+            "foreign_keys": [
+                {"field": "NumeroFacturaCliente", "references": "FacturasClientes", "field_referenced": "NumeroFactura"},
+                {"field": "IdArticulo", "references": "Articulos", "field_referenced": "IdArticulo"}
+            ]
+        },
+        "RenglonesFacturasProveedores": {
+            "columns": {
+                "Renglon": {"type": "INT", "primary_key": true},
+                "NumeroFacturaProveedor": {"type": "INT", "foreign_key": {"references": "FacturasProveedores", "field": "NumeroFacturaProveedor"}},
+                "IdProveedor": {"type": "INT", "foreign_key": {"references": "Proveedores", "field": "IdProveedor"}},
+                "IdArticulo": {"type": "INT", "foreign_key": {"references": "Articulos", "field": "IdArticulo"}},
+                "Cantidad": {"type": "INT"},
+                "PrecioUnitario": {"type": "FLOAT"}
+            },
+            "primary_key": "Renglon",
+            "foreign_keys": [
+                {"field": "NumeroFacturaProveedor", "references": "FacturasProveedores", "field_referenced": "NumeroFacturaProveedor"},
+                {"field": "IdProveedor", "references": "Proveedores", "field_referenced": "IdProveedor"},
+                {"field": "IdArticulo", "references": "Articulos", "field_referenced": "IdArticulo"}
+            ]
+        }
+    }
+}

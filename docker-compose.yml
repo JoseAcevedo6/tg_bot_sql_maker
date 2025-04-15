@@ -5,11 +5,13 @@ services:
     env_file:
       - .env
     build: .
-    restart: always
+    restart: on-failure # always # dejar always cuando este en el servidor
     ports:
       - "8000:8000"
     volumes:
       - .:/app
+      - ./data/botclientes:/root/botclientes
+      - ./data/Dropbox:/root/Dropbox
     networks:
       - bot_network
 

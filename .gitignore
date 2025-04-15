@@ -1,8 +1,10 @@
 /backups/*
+/data/
 /venv
 /logs
 __pycache__/
 chat_bot_db.sql
+fakedb_to_test.sql
 
 !backups/.gitkeep
 !backups/
