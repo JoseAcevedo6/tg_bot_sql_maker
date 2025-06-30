@@ -344,7 +344,6 @@ class ChatBot():
                     f"La base de datos en uso es {self.client.external_db.db_driver.description}. "
 
                     "Es obligatorio validar que cada tabla, columna o relación mencionada en la pregunta exista exactamente como aparece en el contexto. "
-                    "Cualquier pregunta que implique eliminar, crear o modificar datos debe responderse con (0, 'No está permitido generar consultas que alteren la base de datos.')"
                     "No intentes interpretar, adivinar ni corregir posibles errores en la pregunta del usuario. "
                     "Si alguna tabla o campo no se encuentra en el contexto, o si la pregunta no requiere SQL para ser respondida, debes devolver de forma no literal (0, <respuesta en leguaje natural>). "
 
@@ -361,8 +360,7 @@ class ChatBot():
                     if isinstance(parsed, tuple) and len(parsed) == 2 and isinstance(parsed[0], int) and isinstance(parsed[1], str):
                         is_ok, query_or_res = bool(parsed[0]), parsed[1]
                 except (ValueError, SyntaxError) as e:
-                    print(e)
-                    self.print_out("Entro en el Except", "red")
+                    self.print_out(str(e), "red")
                     self.answer = warning + open_ai_response.content
 
                 if not is_ok and query_or_res:
