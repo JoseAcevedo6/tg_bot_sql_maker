@@ -348,6 +348,7 @@ class ChatBot():
                     "Si alguna tabla o campo no se encuentra en el contexto, o si la pregunta no requiere SQL para ser respondida, debes devolver de forma no literal (0, <respuesta en leguaje natural>). "
 
                     "Cuando filtres por texto, asegurate de que las búsquedas sean insensibles a mayúsculas y permitan coincidencias parciales, usando ILIKE, LOWER/UPPER o métodos equivalentes según el motor de base de datos."
+                    "RESPETA EL FORMAT OUTPUT tuple(int, string)"
                 )
 
                 open_ai_response = self.open_ai_model_invoke(sql_prompt, self.question, self.context_text)
