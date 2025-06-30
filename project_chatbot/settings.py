@@ -30,8 +30,10 @@ SECRET_KEY = 'django-insecure-04*q$+z+t9)c02inv%1%5sxvcuvg#3l@m%)gq)1c9-vh%#&bwu
 
 DEBUG = True if 'true' in os.getenv('DEVELOPMENT', 'true') else False
 
-ALLOWED_HOSTS = []
-
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = ["147.79.111.61"]
 
 # Application definition
 
