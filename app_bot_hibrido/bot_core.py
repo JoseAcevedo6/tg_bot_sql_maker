@@ -8,6 +8,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine, URL
 from sqlalchemy.exc import SQLAlchemyError
+import ast
 import csv
 import io
 import os
@@ -40,7 +41,7 @@ class ChatBot():
         self.open_ai_model = ChatOpenAI(model='gpt-3.5-turbo', temperature=0, openai_api_key=self.client.openai_api_key)
         self.telegram_bot = telebot.TeleBot(self.telegram_api_key)
         self.telegram_bot.message_handler(content_types=['document', 'text'])(self.cmd_start)
-    
+
     def clean_file_name(self, file_name: str):
 
         file_name = file_name.replace('.', '-s-dot-s-')
@@ -99,7 +100,7 @@ class ChatBot():
                         else:
                             self.answer = (
                                 f'Lo siento, la contraseña ingresada no coincide con la provista por {self.client.business_name}\n'
-                                 'Por favor ingrese nuevamente la contraseña o conteste "revalidar" para cambiar el mail' 
+                                 'Por favor ingrese nuevamente la contraseña o conteste "revalidar" para cambiar el mail'
                             )
                             return self.send_message()
                     case 3: # validado al usuario
@@ -127,7 +128,7 @@ class ChatBot():
                 return self.send_message()
 
             case '/recargar': # uso de este comando??
-                self.client = Client.objects.get(pk=self.client.pk)      
+                self.client = Client.objects.get(pk=self.client.pk)
                 self.answer = 'Datos recargados.'
                 return self.send_message()
 
@@ -163,7 +164,7 @@ class ChatBot():
                         separators=["\n\n", "\n", ".", " ", ""], # importancia de esto!!
                         length_function = len,
                         add_start_index = True,
-                    )         
+                    )
 
                     os.system(f'mv {folder_path}/*.pdf {folder_path}/entrenados')
                     for d in documents:
@@ -183,7 +184,7 @@ class ChatBot():
                         # actualizo los TokensDisponibles
                         self.user.available_tokens = self.user.available_tokens - total_palabras
                         self.user.save()
-                        
+
                         self.answer += f'Le quedan {self.user.available_tokens} tokens'
                     else:
                         self.answer = "No hay documentos para entrenar"
@@ -219,7 +220,7 @@ class ChatBot():
                         f'Docs únicos: {num_unique_documents}\n\n'
                         'Chunks por documento:\n'
                     )
-                    
+
                     count = 0
                     if document_counts:
                         for index, file_path in enumerate(document_counts, start=count+1):
@@ -335,27 +336,51 @@ class ChatBot():
                         'No encuentro resultados dentro del conjunto de datos con los que fuí entrenado,'
                         'la respuesta viene del entrenamiento previo de Open AI:\n\n'
                     )
-                
+
                 sql_prompt = (
-                    "Devuelve únicamente el código SQL necesario para responder la siguiente pregunta. "
+                    "Tu tarea es generar una consulta SQL basada únicamente en la información contenida en el contexto proporcionado. "
+                    "Devuelve una tupla con dos elementos: "
+                    "(1) un valor booleano (0 o 1) que indique si es necesario y posible generar una consulta SQL, y "
+                    "(2) SIEMPRE, SIEMPRE, SIEMPRE un string, que contenga la consulta SQL o, en caso de que no se pueda o no sea necesario, una string con la respuesta explicativa clara en lenguaje natural. "
                     f"La base de datos en uso es {self.client.external_db.db_driver.description}. "
-                    "Al aplicar filtros por texto, asegúrate de que las búsquedas no distingan entre mayúsculas y minúsculas "
-                    "y que permitan coincidencias parciales (no exactas). "
-                    "Según el motor de base de datos, puedes considerar usar operadores como ILIKE o LIKE con funciones como LOWER o UPPER, "
-                    "o cualquier otra estrategia que logre coincidencias flexibles e insensibles a mayúsculas."
+
+                    "Es obligatorio validar que cada tabla, columna o relación mencionada en la pregunta exista exactamente como aparece en el contexto. "
+                    "Cualquier pregunta que implique eliminar, crear o modificar datos debe responderse con (0, 'No está permitido generar consultas que alteren la base de datos.')"
+                    "No intentes interpretar, adivinar ni corregir posibles errores en la pregunta del usuario. "
+                    "Si alguna tabla o campo no se encuentra en el contexto, o si la pregunta no requiere SQL para ser respondida, debes devolver de forma no literal (0, <respuesta en leguaje natural>). "
+
+                    "Cuando filtres por texto, asegurate de que las búsquedas sean insensibles a mayúsculas y permitan coincidencias parciales, usando ILIKE, LOWER/UPPER o métodos equivalentes según el motor de base de datos."
                 )
 
                 open_ai_response = self.open_ai_model_invoke(sql_prompt, self.question, self.context_text)
 
-                self.context_text = f"Resultado de la query ({open_ai_response.content.replace('\n', '').strip()}):\n"
-                self.context_text += self.run_external_query(query=open_ai_response.content)
+                is_ok = False
+                query_or_res = None
 
-                prompt = 'Responde la pregunta según el contexto CSV provisto a continuación.'
-                open_ai_response = self.open_ai_model_invoke(prompt, self.question, self.context_text)
-                self.answer = warning + open_ai_response.content
+                try:
+                    parsed = ast.literal_eval(open_ai_response.content)
+                    if isinstance(parsed, tuple) and len(parsed) == 2 and isinstance(parsed[0], int) and isinstance(parsed[1], str):
+                        is_ok, query_or_res = bool(parsed[0]), parsed[1]
+                except (ValueError, SyntaxError) as e:
+                    print(e)
+                    self.print_out("Entro en el Except", "red")
+                    self.answer = warning + open_ai_response.content
+
+                if not is_ok and query_or_res:
+                    self.answer = warning + query_or_res
+                elif is_ok and query_or_res:
+                    forbidden_ops = {"update", "delete", "insert", "drop", "create", "truncate", "alter", "rename"}
+                    if any(op in query_or_res.lower() for op in forbidden_ops):
+                        self.answer = warning + "No está permitido generar consultas que alteren la base de datos."
+                    else:
+                        self.context_text = f"Resultado de la query ({query_or_res.replace('\n', '').strip()}):\n"
+                        self.context_text += self.run_external_query(query=query_or_res)
+                        prompt = "Responde la pregunta según el contexto CSV provisto a continuación."
+                        open_ai_response = self.open_ai_model_invoke(prompt, self.question, self.context_text)
+                        self.answer = warning + open_ai_response.content
 
                 return self.send_message()
-        
+
     def get_chroma_client(self, add_embedding: bool=False) -> Chroma:
 
         embedding_function = None
@@ -363,14 +388,14 @@ class ChatBot():
             embedding_function = OpenAIEmbeddings(api_key=self.client.openai_api_key)
 
         return Chroma(persist_directory=f'{self.chroma_path}/{self.message.chat.id}', embedding_function=embedding_function)
-    
+
     def get_sqlalchemy_engine(self) -> Engine | str:
 
         try:
             db_model = self.client.external_db
         except ExternalDatabase.DoesNotExist:
             return "Este cliente no tiene base de datos externa configurada."
-        
+
         url = URL.create(**db_model.get_sqlalchemy_params())
 
         return create_engine(url)
@@ -386,11 +411,11 @@ class ChatBot():
 
         template = ChatPromptTemplate.from_template(prompt + 'Pregunta: {question}\n' + 'Contexto: {context}')
         prompt = template.format(question=question, context=context or 'No se especificó contexto')
-        
+
         return self.open_ai_model.invoke(prompt)
 
     def print_out(self, message: str, color_style: COLORS=None) -> None:
-        
+
         output, style = self.output_style
         color_styles = {
             'green': style.SUCCESS,
@@ -404,7 +429,7 @@ class ChatBot():
             'magenta': style.HTTP_SERVER_ERROR,
             'white': style.SQL_TABLE
         }.get(color_style, style.SUCCESS)
-         
+
         output.write(color_styles(message))
 
     def process_metadata(self, metadata_list: list):
@@ -425,14 +450,14 @@ class ChatBot():
                 unique_documents.add(metadata['file_path'])
 
         return (
-            total_urls, total_documents, 
-            list(unique_urls), list(unique_documents), 
-            len(unique_urls), len(unique_documents), 
+            total_urls, total_documents,
+            list(unique_urls), list(unique_documents),
+            len(unique_urls), len(unique_documents),
             dict(url_counts), dict(document_counts)
         )
 
     def run_external_query(self, query: str) -> str:
-        
+
         try:
             engine = self.get_sqlalchemy_engine()
 
@@ -446,19 +471,19 @@ class ChatBot():
 
                 if not rows:
                     return "No se encontraron resultados."
-                
+
                 output = io.StringIO()
                 writer = csv.writer(output)
                 writer.writerow(columns)      # Header
-                writer.writerows(rows)  
-                
+                writer.writerows(rows)
+
                 return output.getvalue()
 
         except SQLAlchemyError as e:
             return f"Error al ejecutar el query: {e}"
 
     def send_message(self) -> None:
-        
+
         Log.objects.create(
             question=self.question,
             answer=self.answer,
@@ -479,7 +504,7 @@ class ChatBot():
             text = []
             for page in doc:
                 text.append(page.get_text('text'))
-            
+
             full_text = ''.join(text)
             full_text = full_text.replace('�', '')
             words = full_text.split()
