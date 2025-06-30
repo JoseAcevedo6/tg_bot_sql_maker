@@ -55,6 +55,7 @@ class ExternalDatabase(models.Model):
     password = models.CharField(max_length=255)
     database = models.CharField(max_length=255)
     driver = models.CharField(max_length=100, null=True, blank=True)
+        # Optional database driver name, used mainly for SQL Server or other databases requiring specific driver configuration.
 
     class Meta:
         verbose_name = "External Database"

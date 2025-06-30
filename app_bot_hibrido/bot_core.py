@@ -241,7 +241,6 @@ class ChatBot():
             case 'ayuda' | 'help':
                 self.answer = (
                     "Reconozco los comandos:\n"
-                    "/db para realizar consultas en la base de datos.\n"
                     "/desentrenar para eliminar algún documento de mi entrenamiento.\n"
                     "/entrenar para lanzar el entrenamiento sobre los datos ya cargados.\n"
                     "/estado para conocer los tokens disponibles y las preguntas realizadas.\n"
