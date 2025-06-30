@@ -6,7 +6,7 @@ services:
       - .env
     restart: on-failure # always # dejar always cuando este en el servidor
     ports:
-      - "${MYSQL_DBPORT}:${MYSQL_DBPORT}"
+      - "${MYSQL_DBPORT}:3306"
     volumes:
       - ./backups:/backups 
       - mysql_data:/var/lib/mysql
