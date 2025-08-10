@@ -3,7 +3,7 @@ import re
 import telebot
 from openai import OpenAI
 
-from app_bot.bot_core import BotCore
+from .bot_core import BotCore
 from app_bot.models import Client, Context, Session, User
 
 

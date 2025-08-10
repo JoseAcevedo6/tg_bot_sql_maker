@@ -8,7 +8,7 @@ from langchain_community.document_loaders import DirectoryLoader, UnstructuredFi
 from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app_bot.bot_core import BotCore
+from .bot_core import BotCore
 from app_bot.models import Client, Context, Session, User
 
 

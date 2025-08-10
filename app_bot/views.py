@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.views.generic import ListView
 
-from .bot_core import BotCore
+from .bots.bot_core import BotCore
 from .bots.astro_tg_bot import AstroTgBot
 from .bots.sql_tg_bot import SqlTgBot
 from .models import Client

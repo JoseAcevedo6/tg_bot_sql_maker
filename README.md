@@ -1,4 +1,4 @@
-# 📌 Guía para configurar y ejecutar el proyecto
+# 📌 Guía para configurar y ejecutar el proyecto (DESACTIALIZADO AL 2025-08-10)
 
 ## 🗂️ Agregar base de datos
 Colocar el archivo `chat_bot_db.sql` en la carpeta `/backups` del proyecto.

@@ -30,7 +30,7 @@ SECRET_KEY = "django-insecure-04*q$+z+t9)c02inv%1%5sxvcuvg#3l@m%)gq)1c9-vh%#&bwu
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = True if "true" in os.getenv("DEVELOPMENT", "true") else False
+DEBUG = "true" in os.getenv("DEVELOPMENT", "false").lower()
 
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
@@ -87,8 +87,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": os.getenv("MYSQL_DATABASE"),
-        "USER": os.getenv("MYSQL_USER"),
-        "PASSWORD": os.getenv("MYSQL_PASSWORD"),
+        "USER": "root",
+        "PASSWORD": os.getenv("MYSQL_ROOT_PASSWORD"),
         "HOST": os.getenv("MYSQL_HOST"),
         "PORT": "3306",
         "OPTIONS": {

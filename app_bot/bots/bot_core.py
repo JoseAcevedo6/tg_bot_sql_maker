@@ -19,7 +19,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from idsa.settings import DEBUG
 
-from .models import Client, Log, User
+from ..models import Client, Log, User
 
 
 class BotCore:
