@@ -4,7 +4,7 @@ services:
     ports:
       - "8081:8081"
     env_file:
-      - .env.prod
+      - .env
     volumes:
       - ./data/botclientes:/root/botclientes
       - ./data/Dropbox:/root/Dropbox
