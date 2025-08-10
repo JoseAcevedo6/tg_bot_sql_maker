@@ -1,7 +1,7 @@
 FROM python:3.12-slim AS builder
 
 RUN apt-get update && \
-    apt-get install -y build-essential libmariadb-dev pkg-config && \
+    apt-get install -y build-essential mariadb-client libmariadb-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -12,12 +12,13 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 COPY . .
 
+
 FROM python:3.12-slim
 
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y libmariadb-dev && \
+    apt-get install -y libmariadb-dev mariadb-client && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local /usr/local
