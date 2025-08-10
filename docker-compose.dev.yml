@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: chat_bot_app_dev
     build: .
     image: chat_bot_image:latest
     ports:
