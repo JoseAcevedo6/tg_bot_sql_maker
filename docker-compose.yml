@@ -1,5 +1,6 @@
 services:
   app:
+    build: .
     image: chat_bot_image:latest
     ports:
       - "8081:8081"
