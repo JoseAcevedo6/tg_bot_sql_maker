@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Bots activos</title>
+        <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+        <style>
+            dialog {
+                padding: 1em;
+                border: none;
+                border-radius: 0.5em;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            }
+        </style>
+    </head>
+    <body>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Cerrar sesión</button>
+    </form>
+
+    <h1>Bots activos</h1>
+
+    <button onclick="document.getElementById('start-modal').showModal()">Iniciar nuevo bot</button>
+
+    <dialog id="start-modal" closedby="any">
+        <form method="dialog" id="start-bot-form">
+            <label for="client-select">Cliente:</label>
+            <select name="client_id" id="client-select" required>
+                {% for client in object_list %}
+                    <option value="{{ client.id }}">{{ client }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+
+            <label for="bot-type-select">Tipo de bot:</label>
+            <select name="bot_type" id="bot-type-select" required>
+                {% for bot_type in bot_types %}
+                    <option value="{{ bot_type.1 }}">{{ bot_type.1 }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+
+            <button
+                type="submit"
+                hx-post="{% url 'bots' %}"
+                hx-include="#start-bot-form"
+                hx-vals='{"command": "start"}'
+                hx-target="body"
+                hx-on="htmx:afterOnLoad: window.location.reload()"
+                hx-swap="none">
+                Iniciar
+            </button>
+            <button type="button" onclick="document.getElementById('start-modal').close()">Cancelar</button>
+        </form>
+    </dialog>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Tipo de Bot</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in bot_entries %}
+            <tr>
+                <td>{{ entry.client }}</td>
+                <td>{{ entry.bot_type }}</td>
+                <td id="status-{{ entry.client.id }}-{{ entry.bot_type }}">
+                    {% if entry.is_running %}
+                        Corriendo
+                    {% else %}
+                        Detenido
+                    {% endif %}
+                </td>
+                <td>
+                    <button
+                        hx-post="{% url 'bots' %}"
+                        hx-vals='{"client_id": {{ entry.client.id }}, "command": "stop", "bot_type": "{{ entry.bot_type }}"}'
+                        hx-target="#status-{{ entry.client.id }}-{{ entry.bot_type }}"
+                        hx-swap="innerHTML">
+                        Detener
+                    </button>
+                    <button
+                        hx-post="{% url 'bots' %}"
+                        hx-vals='{"client_id": {{ entry.client.id }}, "command": "restart", "bot_type": "{{ entry.bot_type }}"}'
+                        hx-target="#status-{{ entry.client.id }}-{{ entry.bot_type }}"
+                        hx-swap="innerHTML">
+                        Reiniciar
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No hay bots activos.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = "{{ csrf_token }}";
+        });
+    </script>
+
+    </body>
+</html>

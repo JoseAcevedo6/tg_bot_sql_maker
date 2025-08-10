@@ -4,6 +4,14 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def create_initials(apps, schema_editor):
+    DatabaseDriver = apps.get_model('app_bot', 'DatabaseDriver')
+    DatabaseDriver.objects.bulk_create([
+        DatabaseDriver(description="mysql", driver="mysql+pymysql"),
+        DatabaseDriver(description="postgresql", driver="postgresql+psycopg2"),
+        DatabaseDriver(description="sqlserver", driver="mssql+pyodbc"),
+    ])
+
 class Migration(migrations.Migration):
 
     initial = True
@@ -52,7 +60,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Token',
                 'verbose_name_plural': 'Tokens',
-                'db_table': 'tokens',
+                'db_table': 'Tokens',
             },
         ),
         migrations.CreateModel(
@@ -60,12 +68,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(db_column='idContexto', primary_key=True, serialize=False)),
                 ('context', models.CharField(db_column='Contexto', max_length=45)),
-                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='contexts', to='app_bot_hibrido.client')),
+                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='contexts', to='app_bot.client')),
             ],
             options={
                 'verbose_name': 'Context',
                 'verbose_name_plural': 'Contexts',
-                'db_table': 'contextos',
+                'db_table': 'Contextos',
             },
         ),
         migrations.CreateModel(
@@ -74,12 +82,12 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(db_column='IdCurso', primary_key=True, serialize=False)),
                 ('name', models.CharField(db_column='DsCurso', max_length=100, unique=True)),
                 ('is_active', models.IntegerField(db_column='Vigente', default=1)),
-                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='courses', to='app_bot_hibrido.client')),
+                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='courses', to='app_bot.client')),
             ],
             options={
                 'verbose_name': 'Course',
                 'verbose_name_plural': 'Courses',
-                'db_table': 'cursos',
+                'db_table': 'Cursos',
             },
         ),
         migrations.CreateModel(
@@ -95,12 +103,12 @@ class Migration(migrations.Migration):
                 ('source', models.CharField(blank=True, db_column='Source', max_length=200, null=True)),
                 ('date', models.DateField(auto_now_add=True, db_column='Fecha')),
                 ('time', models.TimeField(auto_now_add=True, db_column='Hora')),
-                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='logs', to='app_bot_hibrido.client')),
+                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='logs', to='app_bot.client')),
             ],
             options={
                 'verbose_name': 'Log',
                 'verbose_name_plural': 'Logs',
-                'db_table': 'log',
+                'db_table': 'Log',
             },
         ),
         migrations.CreateModel(
@@ -111,12 +119,12 @@ class Migration(migrations.Migration):
                 ('question', models.TextField(db_column='Pregunta')),
                 ('date', models.DateField(auto_now_add=True, db_column='Fecha')),
                 ('time', models.TimeField(auto_now_add=True, db_column='Hora')),
-                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='questions', to='app_bot_hibrido.client')),
+                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='questions', to='app_bot.client')),
             ],
             options={
                 'verbose_name': 'Question',
                 'verbose_name_plural': 'Questions',
-                'db_table': 'preguntas',
+                'db_table': 'Preguntas',
             },
         ),
         migrations.CreateModel(
@@ -127,13 +135,13 @@ class Migration(migrations.Migration):
                 ('answer', models.TextField(blank=True, db_column='Respuesta', null=True)),
                 ('date', models.DateField(auto_now_add=True, db_column='Fecha')),
                 ('time', models.TimeField(auto_now_add=True, db_column='Hora')),
-                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='answers', to='app_bot_hibrido.client')),
-                ('question', models.ForeignKey(blank=True, db_column='IdPregunta', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='answers', to='app_bot_hibrido.question')),
+                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='answers', to='app_bot.client')),
+                ('question', models.ForeignKey(blank=True, db_column='IdPregunta', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='answers', to='app_bot.question')),
             ],
             options={
                 'verbose_name': 'Answer',
                 'verbose_name_plural': 'Answers',
-                'db_table': 'respuestas',
+                'db_table': 'Respuestas',
             },
         ),
         migrations.CreateModel(
@@ -144,13 +152,13 @@ class Migration(migrations.Migration):
                 ('last_name', models.CharField(blank=True, db_column='Apellido', max_length=100, null=True)),
                 ('first_name', models.CharField(blank=True, db_column='Nombre', max_length=100, null=True)),
                 ('validation', models.IntegerField(db_column='Validacion', default=0)),
-                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='app_bot_hibrido.client')),
-                ('context', models.ForeignKey(blank=True, db_column='IdContexto', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sessions', to='app_bot_hibrido.context')),
+                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='app_bot.client')),
+                ('context', models.ForeignKey(blank=True, db_column='IdContexto', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sessions', to='app_bot.context')),
             ],
             options={
                 'verbose_name': 'Session',
                 'verbose_name_plural': 'Sessions',
-                'db_table': 'sesiones',
+                'db_table': 'Sesiones',
                 'unique_together': {('chat_id', 'client')},
             },
         ),
@@ -162,13 +170,13 @@ class Migration(migrations.Migration):
                 ('text', models.CharField(db_column='Texto', max_length=2048)),
                 ('file', models.CharField(blank=True, db_column='Archivo', max_length=512, null=True)),
                 ('html', models.IntegerField(blank=True, db_column='HTML', null=True)),
-                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='texts', to='app_bot_hibrido.client')),
-                ('context', models.ForeignKey(blank=True, db_column='IdContexto', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='texts', to='app_bot_hibrido.context')),
+                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='texts', to='app_bot.client')),
+                ('context', models.ForeignKey(blank=True, db_column='IdContexto', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='texts', to='app_bot.context')),
             ],
             options={
                 'verbose_name': 'Text',
                 'verbose_name_plural': 'Texts',
-                'db_table': 'textos',
+                'db_table': 'Textos',
                 'unique_together': {('text_id', 'client')},
             },
         ),
@@ -177,14 +185,14 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(db_column='IdSinonimo', primary_key=True, serialize=False)),
                 ('synonym', models.CharField(db_column='Sinonimo', max_length=45)),
-                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='synonyms', to='app_bot_hibrido.client')),
-                ('context', models.ForeignKey(blank=True, db_column='IdContexto', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='synonyms', to='app_bot_hibrido.context')),
-                ('text', models.ForeignKey(db_column='IdTexto', on_delete=django.db.models.deletion.CASCADE, related_name='synonyms', to='app_bot_hibrido.text')),
+                ('client', models.ForeignKey(blank=True, db_column='IdCliente', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='synonyms', to='app_bot.client')),
+                ('context', models.ForeignKey(blank=True, db_column='IdContexto', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='synonyms', to='app_bot.context')),
+                ('text', models.ForeignKey(db_column='IdTexto', on_delete=django.db.models.deletion.CASCADE, related_name='synonyms', to='app_bot.text')),
             ],
             options={
                 'verbose_name': 'Synonym',
                 'verbose_name_plural': 'Synonyms',
-                'db_table': 'sinonimos',
+                'db_table': 'Sinonimos',
             },
         ),
         migrations.CreateModel(
@@ -197,8 +205,8 @@ class Migration(migrations.Migration):
                 ('asked_questions', models.IntegerField(blank=True, db_column='PreguntasRealizadas', null=True)),
                 ('category', models.CharField(blank=True, db_column='Categoria', max_length=45, null=True)),
                 ('is_teacher', models.SmallIntegerField(db_column='EsProfesor', default=0)),
-                ('session', models.ForeignKey(blank=True, db_column='ChatId', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='app_bot_hibrido.session')),
-                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='users', to='app_bot_hibrido.client')),
+                ('session', models.ForeignKey(blank=True, db_column='ChatId', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='app_bot.session')),
+                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='users', to='app_bot.client')),
             ],
             options={
                 'verbose_name': 'User',
@@ -210,16 +218,47 @@ class Migration(migrations.Migration):
             name='TextCourseContext',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot_hibrido.client')),
-                ('context', models.ForeignKey(db_column='IdContexto', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot_hibrido.context')),
-                ('course', models.ForeignKey(db_column='IdCurso', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot_hibrido.course')),
-                ('text', models.ForeignKey(db_column='IdTexto', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot_hibrido.text')),
+                ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot.client')),
+                ('context', models.ForeignKey(db_column='IdContexto', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot.context')),
+                ('course', models.ForeignKey(db_column='IdCurso', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot.course')),
+                ('text', models.ForeignKey(db_column='IdTexto', on_delete=django.db.models.deletion.CASCADE, related_name='text_course_contexts', to='app_bot.text')),
             ],
             options={
                 'verbose_name': 'TextCourseContext',
                 'verbose_name_plural': "TextCourseContext's",
-                'db_table': 'textoscursoycontexto',
+                'db_table': 'TextosCursoyContexto',
                 'unique_together': {('client', 'context', 'course')},
+            },
+        ),
+        migrations.CreateModel(
+            name='DatabaseDriver',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('description', models.CharField(max_length=100)),
+                ('driver', models.CharField(max_length=100)),
+            ],
+            options={
+                'verbose_name': 'Database Driver',
+                'verbose_name_plural': 'Database Drivers',
+            },
+        ),
+        migrations.RunPython(create_initials),
+        migrations.CreateModel(
+            name='ExternalDatabase',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('host', models.CharField(max_length=255)),
+                ('port', models.IntegerField()),
+                ('username', models.CharField(max_length=100)),
+                ('password', models.CharField(max_length=255)),
+                ('database', models.CharField(max_length=255)),
+                ('driver', models.CharField(blank=True, max_length=100, null=True)),
+                ('client', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='external_db', to='app_bot.client')),
+                ('db_driver', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app_bot.databasedriver')),
+            ],
+            options={
+                'verbose_name': 'External Database',
+                'verbose_name_plural': 'External Databases',
             },
         ),
     ]

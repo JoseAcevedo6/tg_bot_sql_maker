@@ -1,0 +1,11 @@
+black==25.1.0
+flake8==7.3.0
+flake8-bugbear==24.12.12
+flake8-comprehensions==3.16.0
+flake8-pyproject==1.2.3
+isort==6.0.1
+mypy==1.17.0
+django-stubs[compatible-mypy]
+
+# Formatting, local development outside the container.
+#pip install -r requirements-dev.txt

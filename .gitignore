@@ -1,12 +1,10 @@
+__pycache__/
 .env
+.mypy_cache/
+.vscode/
 
 /backups/*
+!/backups/.gitkeep
 /data/
 /venv
 /logs
-__pycache__/
-chat_bot_db.sql
-fakedb_to_test.sql
-
-!backups/.gitkeep
-!backups/

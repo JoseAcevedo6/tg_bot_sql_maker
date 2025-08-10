@@ -1,3 +1,8 @@
+# mypy: disable-error-code=var-annotated
+from __future__ import annotations
+
+from typing import Any
+
 from django.db import models
 
 
@@ -23,13 +28,15 @@ class Client(models.Model):
     prompt_prod = models.CharField(db_column="promptproduccion", max_length=1600)
     bot_closed = models.IntegerField(db_column="bot_cerrado")
 
+    external_db: ExternalDatabase | None
+
     class Meta:
         db_table = "clientes"
         verbose_name = "Client"
         verbose_name_plural = "Clients"
 
-    def __str__(self):
-        return self.business_name
+    def __str__(self) -> str:
+        return str(self.business_name)
 
 
 class DatabaseDriver(models.Model):
@@ -37,8 +44,8 @@ class DatabaseDriver(models.Model):
     description = models.CharField(max_length=100)
     driver = models.CharField(max_length=100)
 
-    def __str__(self):
-        return self.description
+    def __str__(self) -> str:
+        return str(self.description)
 
     class Meta:
         verbose_name = "Database Driver"
@@ -55,13 +62,13 @@ class ExternalDatabase(models.Model):
     password = models.CharField(max_length=255)
     database = models.CharField(max_length=255)
     driver = models.CharField(max_length=100, null=True, blank=True)
-        # Optional database driver name, used mainly for SQL Server or other databases requiring specific driver configuration.
+    # Optional database driver name, used mainly for SQL Server or other databases requiring specific driver configuration.
 
     class Meta:
         verbose_name = "External Database"
         verbose_name_plural = "External Databases"
 
-    def get_sqlalchemy_params(self) -> dict:
+    def get_sqlalchemy_params(self) -> dict[str, Any]:
         data = {
             "drivername": self.db_driver.driver,
             "username": self.username,
@@ -81,10 +88,12 @@ class Context(models.Model):
 
     id = models.AutoField(db_column="idContexto", primary_key=True)
     context = models.CharField(db_column="Contexto", max_length=45)
-    client = models.ForeignKey(Client, db_column="IdCliente", related_name="contexts", on_delete=models.SET_NULL, null=True, blank=True)
+    client = models.ForeignKey(
+        Client, db_column="IdCliente", related_name="contexts", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
-        db_table = "contextos"
+        db_table = "Contextos"
         verbose_name = "Context"
         verbose_name_plural = "Contexts"
 
@@ -94,10 +103,12 @@ class Course(models.Model):
     id = models.AutoField(db_column="IdCurso", primary_key=True)
     name = models.CharField(db_column="DsCurso", max_length=100, unique=True)
     is_active = models.IntegerField(db_column="Vigente", default=1)
-    client = models.ForeignKey(Client, db_column="IdCliente", related_name="courses", on_delete=models.SET_NULL, null=True, blank=True)
+    client = models.ForeignKey(
+        Client, db_column="IdCliente", related_name="courses", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
-        db_table = "cursos"
+        db_table = "Cursos"
         verbose_name = "Course"
         verbose_name_plural = "Courses"
 
@@ -117,7 +128,7 @@ class Log(models.Model):
     time = models.TimeField(db_column="Hora", auto_now_add=True)
 
     class Meta:
-        db_table = "log"
+        db_table = "Log"
         verbose_name = "Log"
         verbose_name_plural = "Logs"
 
@@ -129,10 +140,12 @@ class Session(models.Model):
     first_name = models.CharField(db_column="Nombre", max_length=100, null=True, blank=True)
     validation = models.IntegerField(db_column="Validacion", default=0)
     client = models.ForeignKey(Client, db_column="IdCliente", related_name="sessions", on_delete=models.CASCADE)
-    context = models.ForeignKey(Context, db_column="IdContexto", related_name="sessions", on_delete=models.SET_NULL, null=True, blank=True)
+    context = models.ForeignKey(
+        Context, db_column="IdContexto", related_name="sessions", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
-        db_table = "sesiones"
+        db_table = "Sesiones"
         verbose_name = "Session"
         verbose_name_plural = "Sessions"
         unique_together = ("chat_id", "client")
@@ -143,12 +156,14 @@ class Question(models.Model):
     id = models.AutoField(db_column="idPregunta", primary_key=True)
     chat_id = models.BigIntegerField(db_column="ChatId", null=True, blank=True)
     question = models.TextField(db_column="Pregunta")
-    client = models.ForeignKey(Client, db_column="IdCliente", related_name="questions", on_delete=models.SET_NULL, null=True, blank=True)
+    client = models.ForeignKey(
+        Client, db_column="IdCliente", related_name="questions", on_delete=models.SET_NULL, null=True, blank=True
+    )
     date = models.DateField(db_column="Fecha", auto_now_add=True)
     time = models.TimeField(db_column="Hora", auto_now_add=True)
 
     class Meta:
-        db_table = "preguntas"
+        db_table = "Preguntas"
         verbose_name = "Question"
         verbose_name_plural = "Questions"
 
@@ -158,13 +173,17 @@ class Answer(models.Model):
     id = models.AutoField(db_column="IdRespuesta", primary_key=True)
     chat_id = models.BigIntegerField(db_column="ChatId", null=True, blank=True)
     answer = models.TextField(db_column="Respuesta", null=True, blank=True)
-    question = models.ForeignKey(Question, db_column="IdPregunta", related_name="answers", on_delete=models.SET_NULL, null=True, blank=True)
-    client = models.ForeignKey(Client, db_column="IdCliente", related_name="answers", on_delete=models.SET_NULL, null=True, blank=True)
+    question = models.ForeignKey(
+        Question, db_column="IdPregunta", related_name="answers", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    client = models.ForeignKey(
+        Client, db_column="IdCliente", related_name="answers", on_delete=models.SET_NULL, null=True, blank=True
+    )
     date = models.DateField(db_column="Fecha", auto_now_add=True)
     time = models.TimeField(db_column="Hora", auto_now_add=True)
 
     class Meta:
-        db_table = "respuestas"
+        db_table = "Respuestas"
         verbose_name = "Answer"
         verbose_name_plural = "Answers"
 
@@ -176,10 +195,12 @@ class Text(models.Model):
     file = models.CharField(db_column="Archivo", max_length=512, null=True, blank=True)
     html = models.IntegerField(db_column="HTML", null=True, blank=True)
     client = models.ForeignKey(Client, db_column="IdCliente", related_name="texts", on_delete=models.CASCADE)
-    context = models.ForeignKey(Context, db_column="IdContexto", related_name="texts", on_delete=models.SET_NULL, null=True, blank=True)
+    context = models.ForeignKey(
+        Context, db_column="IdContexto", related_name="texts", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
-        db_table = "textos"
+        db_table = "Textos"
         verbose_name = "Text"
         verbose_name_plural = "Texts"
         unique_together = ("text_id", "client")
@@ -189,12 +210,16 @@ class Synonym(models.Model):
 
     id = models.AutoField(db_column="IdSinonimo", primary_key=True)
     synonym = models.CharField(db_column="Sinonimo", max_length=45)
-    client = models.ForeignKey(Client, db_column="IdCliente", related_name="synonyms", on_delete=models.SET_NULL, null=True, blank=True)
-    context = models.ForeignKey(Context, db_column="IdContexto", related_name="synonyms", on_delete=models.SET_NULL, null=True, blank=True)
+    client = models.ForeignKey(
+        Client, db_column="IdCliente", related_name="synonyms", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    context = models.ForeignKey(
+        Context, db_column="IdContexto", related_name="synonyms", on_delete=models.SET_NULL, null=True, blank=True
+    )
     text = models.ForeignKey(Text, db_column="IdTexto", related_name="synonyms", on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "sinonimos"
+        db_table = "Sinonimos"
         verbose_name = "Synonym"
         verbose_name_plural = "Synonyms"
 
@@ -207,7 +232,7 @@ class TextCourseContext(models.Model):
     text = models.ForeignKey(Text, db_column="IdTexto", related_name="text_course_contexts", on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "textoscursoycontexto"
+        db_table = "TextosCursoyContexto"
         verbose_name = "TextCourseContext"
         verbose_name_plural = "TextCourseContext's"
         unique_together = ("client", "context", "course")
@@ -221,7 +246,7 @@ class Token(models.Model):
     test = models.SmallIntegerField(db_column="Prueba", null=True, blank=True)
 
     class Meta:
-        db_table = "tokens"
+        db_table = "Tokens"
         verbose_name = "Token"
         verbose_name_plural = "Tokens"
 
@@ -235,7 +260,9 @@ class User(models.Model):
     asked_questions = models.IntegerField(db_column="PreguntasRealizadas", null=True, blank=True)
     category = models.CharField(db_column="Categoria", max_length=45, null=True, blank=True)
     is_teacher = models.SmallIntegerField(db_column="EsProfesor", default=0)
-    session = models.ForeignKey(Session, db_column="ChatId", related_name="users", on_delete=models.SET_NULL, null=True, blank=True)
+    session = models.ForeignKey(
+        Session, db_column="ChatId", related_name="users", on_delete=models.SET_NULL, null=True, blank=True
+    )
     client = models.ForeignKey(Client, db_column="IdCliente", related_name="users", on_delete=models.CASCADE)
 
     class Meta:
