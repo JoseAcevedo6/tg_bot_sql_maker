@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
                 ('asked_questions', models.IntegerField(blank=True, db_column='PreguntasRealizadas', null=True)),
                 ('category', models.CharField(blank=True, db_column='Categoria', max_length=45, null=True)),
                 ('is_teacher', models.SmallIntegerField(db_column='EsProfesor', default=0)),
-                ('session', models.ForeignKey(blank=True, db_column='ChatId', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='app_bot.session')),
+                ('session', models.ForeignKey(blank=True, db_column='IdSesion', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='app_bot.session')),
                 ('client', models.ForeignKey(db_column='IdCliente', on_delete=django.db.models.deletion.CASCADE, related_name='users', to='app_bot.client')),
             ],
             options={

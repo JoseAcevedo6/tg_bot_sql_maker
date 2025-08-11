@@ -261,7 +261,7 @@ class User(models.Model):
     category = models.CharField(db_column="Categoria", max_length=45, null=True, blank=True)
     is_teacher = models.SmallIntegerField(db_column="EsProfesor", default=0)
     session = models.ForeignKey(
-        Session, db_column="ChatId", related_name="users", on_delete=models.SET_NULL, null=True, blank=True
+        Session, db_column="IdSesion", related_name="users", on_delete=models.SET_NULL, null=True, blank=True
     )
     client = models.ForeignKey(Client, db_column="IdCliente", related_name="users", on_delete=models.CASCADE)
 
