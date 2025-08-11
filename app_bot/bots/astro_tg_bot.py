@@ -3,8 +3,9 @@ import re
 import telebot
 from openai import OpenAI
 
-from .bot_core import BotCore
 from app_bot.models import Client, Context, Session, User
+
+from .bot_core import BotCore
 
 
 class AstroTgBot(BotCore):
@@ -75,19 +76,13 @@ class AstroTgBot(BotCore):
                             return self.send_message()
                     case 3:  # validado al usuario
                         self.user = client_users.filter(session=session).first()
-        else:
-            self.user = User.objects.filter(client=self.client, session__chat_id=self.message.chat.id).first()
-
-        if not self.user:
-            self.answer = (
-                f"Lo siento, no estás autorizado a interactuar con {self.client.business_name}.\n"
-                "Por favor contacta al administrador del sistema."
-            )
-            return self.send_message()
 
         match self.question:
             case "/estado":
-                self.answer = f"Para el mes en curso dispones de {self.user.available_tokens} tokens y llevas {self.user.asked_questions} preguntas realizadas."
+                if self.user:
+                    self.answer = f"Para el mes en curso dispones de {self.user.available_tokens} tokens y llevas {self.user.asked_questions} preguntas realizadas."
+                else:
+                    self.answer = "Bot abierto. Puedes hacer preguntas sobre astronomía."
                 return self.send_message()
 
             case "/recargar":  # uso de este comando??

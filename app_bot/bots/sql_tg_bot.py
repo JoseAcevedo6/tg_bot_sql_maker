@@ -8,8 +8,9 @@ from langchain_community.document_loaders import DirectoryLoader, UnstructuredFi
 from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from .bot_core import BotCore
 from app_bot.models import Client, Context, Session, User
+
+from .bot_core import BotCore
 
 
 class SqlTgBot(BotCore):
@@ -84,15 +85,6 @@ class SqlTgBot(BotCore):
                             return self.send_message()
                     case 3:  # validado al usuario
                         self.user = client_users.filter(session=session).first()
-        else:
-            self.user = User.objects.filter(client=self.client, session__chat_id=self.message.chat.id).first()
-
-        if not self.user:
-            self.answer = (
-                f"Lo siento, no estás autorizado a interactuar con {self.client.business_name}.\n"
-                "Por favor contacta al administrador del sistema."
-            )
-            return self.send_message()
 
         if self.message.document:  # reviso si vino un documento
             directory_path = os.path.join(self.client.documents_folder, str(self.message.chat.id))
@@ -110,7 +102,10 @@ class SqlTgBot(BotCore):
 
         match self.question:
             case "/estado":
-                self.answer = f"Para el mes en curso dispones de {self.user.available_tokens} tokens y llevas {self.user.asked_questions} preguntas realizadas."
+                if self.user:
+                    self.answer = f"Para el mes en curso dispones de {self.user.available_tokens} tokens y llevas {self.user.asked_questions} preguntas realizadas."
+                else:
+                    self.answer = "Bot abierto. Puedes hacer preguntas sobre tu base de datos."
                 return self.send_message()
 
             case "/recargar":  # uso de este comando??
@@ -132,7 +127,7 @@ class SqlTgBot(BotCore):
                     file = d.metadata["file_path"]
                     total_palabras = total_palabras + self.word_counter(file)
 
-                if total_palabras > self.user.available_tokens:
+                if self.user and total_palabras > self.user.available_tokens:
                     self.answer = (
                         f"Los documentos que trata de entrenar suman: {total_palabras} tokens"
                         f"Dispone sólo de: {self.user.available_tokens} tokens"
@@ -163,10 +158,11 @@ class SqlTgBot(BotCore):
                         self.answer += f"Grabados {len(chunks)} a {self.chroma_path}\n"
 
                         # actualizo los TokensDisponibles
-                        self.user.available_tokens = self.user.available_tokens - total_palabras
-                        self.user.save()
+                        if self.user:
+                            self.user.available_tokens = self.user.available_tokens - total_palabras
+                            self.user.save()
 
-                        self.answer += f"Le quedan {self.user.available_tokens} tokens"
+                            self.answer += f"Le quedan {self.user.available_tokens} tokens"
                     else:
                         self.answer = "No hay documentos para entrenar"
                 return self.send_message()
