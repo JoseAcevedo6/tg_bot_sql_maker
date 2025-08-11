@@ -85,7 +85,7 @@ Para mantener un historial claro, ordenado y fácil de analizar, vamos a usar pr
 - **Calidad:** fomenta mensajes consistentes y claros.  
 - **Automatización:** herramientas y pipelines pueden usar estos flags para generar changelogs, releases, y estadísticas.
 
-## Lista de flags y su uso
+## Flags y sus usos
 
 | Flag     | Descripción                                                        | Ejemplo de mensaje                          |
 |----------|-------------------------------------------------------------------|--------------------------------------------|
