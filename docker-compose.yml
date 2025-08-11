@@ -3,8 +3,6 @@ services:
     container_name: chat_bot_app_prod
     build: .
     image: chat_bot_image:latest
-    ports:
-      - "8081:8081"
     env_file:
       - .env
     volumes:
@@ -12,6 +10,19 @@ services:
       - ./data/Dropbox:/root/Dropbox
     restart: always
     command: gunicorn --bind 0.0.0.0:8081 idsa.wsgi:application
+    networks:
+      - main
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_chat_bot_prod
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./staticfiles:/staticfiles:ro
+    depends_on:
+      - app
     networks:
       - main
 
