@@ -3,10 +3,12 @@ import io
 import os
 import time
 from collections import defaultdict
-from typing import Any
+from functools import wraps
+from typing import Any, Callable, ParamSpec, TypeVar
 
 import pymupdf
 import telebot
+from django.db import connection
 from django.utils.text import slugify
 from langchain.prompts import ChatPromptTemplate
 from langchain_chroma import Chroma
@@ -17,9 +19,20 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL, Engine
 from sqlalchemy.exc import SQLAlchemyError
 
+from app_bot.models import Client, Log, User
 from idsa.settings import DEBUG
 
-from ..models import Client, Log, User
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def ensure_db_connection(func: Callable[P, R]) -> Callable[P, R]:
+    @wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        connection.ensure_connection()
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 class BotCore:

@@ -3,9 +3,8 @@ import re
 import telebot
 from openai import OpenAI
 
+from app_bot.bots.bot_core import BotCore, ensure_db_connection
 from app_bot.models import Client, Context, Session, User
-
-from .bot_core import BotCore
 
 
 class AstroTgBot(BotCore):
@@ -18,6 +17,7 @@ class AstroTgBot(BotCore):
         self.telegram_bot = telebot.TeleBot(self.telegram_api_key)
         self.telegram_bot.message_handler(content_types=["document", "text"])(self.cmd_start)
 
+    @ensure_db_connection
     def cmd_start(self, message: telebot.types.Message) -> None:
 
         self.message = message

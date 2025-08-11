@@ -8,9 +8,8 @@ from langchain_community.document_loaders import DirectoryLoader, UnstructuredFi
 from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from app_bot.bots.bot_core import BotCore, ensure_db_connection
 from app_bot.models import Client, Context, Session, User
-
-from .bot_core import BotCore
 
 
 class SqlTgBot(BotCore):
@@ -27,6 +26,7 @@ class SqlTgBot(BotCore):
             raise RuntimeError("Error al inicializar el bot de Telegram")
         self.telegram_bot.message_handler(content_types=["document", "text"])(self.cmd_start)
 
+    @ensure_db_connection
     def cmd_start(self, message: telebot.types.Message) -> None:
 
         self.message = message
