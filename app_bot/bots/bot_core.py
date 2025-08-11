@@ -59,17 +59,15 @@ class BotCore:
         return Chroma(persist_directory=f"{self.chroma_path}/{self.message.chat.id}", embedding_function=embedding_function)
 
     def get_langchain_openai_response(self, prompt: str, question: str, context: str | None = None) -> BaseMessage:
-        if not self.user:
-            return BaseMessage(content="Usuario no encontrado.")
-        elif not isinstance(self.open_ai_model, ChatOpenAI):
-            return BaseMessage(content="El modelo de IA no está configurado correctamente.")
         # only for a langchain.ChatOpenAI instance
-        self.user.asked_questions += 1
-        self.user.save()  # Actualizo las preguntas realizadas
-
-        if self.user.asked_questions > 1000:  # Espera una décima segundo más por cada pregunta adicional
-            delta = (self.user.asked_questions - 1000) / 10
-            time.sleep(delta)
+        if not isinstance(self.open_ai_model, ChatOpenAI):
+            return BaseMessage(content="El modelo de IA no está configurado correctamente.")
+        if self.user:
+            self.user.asked_questions += 1
+            self.user.save()  # Actualizo las preguntas realizadas
+            if self.user.asked_questions > 1000:  # Espera una décima segundo más por cada pregunta adicional
+                delta = (self.user.asked_questions - 1000) / 10
+                time.sleep(delta)
 
         template = ChatPromptTemplate.from_template(prompt + "Pregunta: {question}\n" + "Contexto: {context}")
         prompt = template.format(question=question, context=context or "No se especificó contexto")
@@ -77,17 +75,15 @@ class BotCore:
         return self.open_ai_model.invoke(prompt)
 
     def get_openai_response(self, question: str) -> str:
-        if not self.user:
-            return "Usuario no encontrado."
-        elif not isinstance(self.open_ai_model, OpenAI):
-            return "El modelo de IA no está configurado correctamente."
         # only for a OpenAI instance
-        self.user.asked_questions += 1
-        self.user.save()
-
-        if self.user.asked_questions > 1000:
-            delta = (self.user.asked_questions - 1000) / 10
-            time.sleep(delta)
+        if not isinstance(self.open_ai_model, OpenAI):
+            return "El modelo de IA no está configurado correctamente."
+        if self.user:
+            self.user.asked_questions += 1
+            self.user.save()
+            if self.user.asked_questions > 1000:
+                delta = (self.user.asked_questions - 1000) / 10
+                time.sleep(delta)
 
         response = self.open_ai_model.chat.completions.create(
             model="gpt-4o",
