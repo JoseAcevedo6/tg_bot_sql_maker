@@ -8,7 +8,8 @@ from typing import Any, Callable, ParamSpec, TypeVar
 
 import pymupdf
 import telebot
-from django.db import connection
+from django.db import close_old_connections, connection
+from django.db.utils import OperationalError
 from django.utils.text import slugify
 from langchain.prompts import ChatPromptTemplate
 from langchain_chroma import Chroma
@@ -29,8 +30,16 @@ R = TypeVar("R")
 def ensure_db_connection(func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        connection.ensure_connection()
-        return func(*args, **kwargs)
+        try:
+            # Cierra conexiones muertas y abre una nueva para este hilo
+            close_old_connections()
+            connection.ensure_connection()
+            return func(*args, **kwargs)
+        except OperationalError:
+            # Si la conexión se perdió durante la ejecución, reintenta una vez
+            close_old_connections()
+            connection.ensure_connection()
+            return func(*args, **kwargs)
 
     return wrapper
 
