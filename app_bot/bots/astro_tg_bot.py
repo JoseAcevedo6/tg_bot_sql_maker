@@ -3,7 +3,7 @@ import re
 import telebot
 from openai import OpenAI
 
-from app_bot.bots.bot_core import BotCore, ensure_db_connection
+from app_bot.bots.bot_core import BotCore, ensure_db_connection, logger
 from app_bot.models import Client, Context, Session, User
 
 
@@ -19,6 +19,10 @@ class AstroTgBot(BotCore):
 
     @ensure_db_connection
     def cmd_start(self, message: telebot.types.Message) -> None:
+
+        logger.info(
+            f"Recibiendo consulta del usuario {message.from_user.first_name if message else 'No name'}"
+        )  # Debugging output
 
         self.message = message
         self.question = "ayuda" if not self.message.text else self.message.text.lower()

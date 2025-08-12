@@ -219,8 +219,9 @@ class BotCore:
             source=self.source,
         )
         try:
-            logger.info(f"Enviando respuesta al usuario {self.message.from_user.id}: {self.answer}")  # Debugging output
+            logger.info(f"Enviando respuesta al usuario {self.message.from_user.first_name}")  # Debugging output
             self.telegram_bot.send_message(self.message.chat.id, self.answer)
+            logger.info(f"ENVIADA: {self.message.from_user.first_name}")  # Debugging output
             self.answer = None
         except telebot.apihelper.ApiTelegramException as e:
             if e.result.status_code == 429:
