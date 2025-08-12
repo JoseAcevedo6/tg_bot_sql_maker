@@ -219,17 +219,13 @@ class BotCore:
             source=self.source,
         )
         try:
-            logger.info(f"Enviando respuesta al usuario {self.message.from_user.first_name}")  # Debugging output
+            logger.info(f"ENVIANDO: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
             self.telegram_bot.send_message(self.message.chat.id, self.answer)
-            logger.info(f"ENVIADA: {self.message.from_user.first_name}")  # Debugging output
+            logger.info(f"ENVIADA: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
             self.answer = None
-        except telebot.apihelper.ApiTelegramException as e:
-            if e.result.status_code == 429:
-                logger.info(f"Rate limit hit: retry after {e.result.json()['parameters']['retry_after']} seconds")
-            else:
-                raise
         except Exception as e:
-            logger.info(f"Error general en cmd_start: {e}")
+            logger.info(f"FALLO: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
+            logger.info(f"Error general en send_message: {e}")
 
     def start(self) -> None:
         self.telegram_bot.infinity_polling(timeout=60, long_polling_timeout=60)

@@ -21,7 +21,7 @@ class AstroTgBot(BotCore):
     def cmd_start(self, message: telebot.types.Message) -> None:
 
         logger.info(
-            f"Recibiendo consulta del usuario {message.from_user.first_name if message else 'No name'}"
+            f"RECIBIDO: mensaje {getattr(self.message, 'id', 'None')}, usuario {getattr(getattr(self.message, 'from_user', None), 'full_name', 'None')}"
         )  # Debugging output
 
         self.message = message
