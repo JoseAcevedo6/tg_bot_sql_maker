@@ -221,7 +221,7 @@ class BotCore:
         try:
             logger.info(f"ENVIANDO: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
             self.telegram_bot.send_message(self.message.chat.id, self.answer)
-            logger.info(f"ENVIADA: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
+            logger.info(f"ENVIADO: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
             self.answer = None
         except Exception as e:
             logger.info(f"FALLO: mensaje {self.message.id}, usuario {self.message.from_user.full_name}")  # Debugging output
