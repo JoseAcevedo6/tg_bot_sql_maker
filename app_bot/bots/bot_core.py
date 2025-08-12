@@ -2,6 +2,7 @@ import csv
 import io
 import logging
 import os
+import sys
 import time
 from collections import defaultdict
 from functools import wraps
@@ -25,7 +26,18 @@ from app_bot.models import Client, Log, User
 from idsa.settings import DEBUG
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.hasHandlers():
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
 telebot.logger.setLevel(logging.INFO)  # Show bots output in console
+if not telebot.logger.hasHandlers():
+    telebot_handler = logging.StreamHandler(sys.stdout)
+    telebot_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+    telebot.logger.addHandler(telebot_handler)
 
 P = ParamSpec("P")
 R = TypeVar("R")
