@@ -206,6 +206,7 @@ class BotCore:
             source=self.source,
         )
         try:
+            print(f"Enviando respuesta al usuario {self.message.from_user.id}: {self.answer}")  # Debugging output
             self.telegram_bot.send_message(self.message.chat.id, self.answer)
             self.answer = None
         except telebot.apihelper.ApiTelegramException as e:
