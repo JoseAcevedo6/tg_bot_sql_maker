@@ -91,7 +91,7 @@ DATABASES = {
         "PASSWORD": os.getenv("MYSQL_PASSWORD"),
         "HOST": os.getenv("MYSQL_HOST"),
         "PORT": "3306",
-        "CONN_MAX_AGE": None,
+        "CONN_MAX_AGE": 300,
         "OPTIONS": {
             "charset": "utf8mb4",
             "init_command": "SET NAMES 'utf8mb4'",

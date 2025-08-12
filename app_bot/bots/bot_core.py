@@ -1,5 +1,6 @@
 import csv
 import io
+import logging
 import os
 import time
 from collections import defaultdict
@@ -47,6 +48,8 @@ def ensure_db_connection(func: Callable[P, R]) -> Callable[P, R]:
 class BotCore:
 
     def __init__(self, client: Client):
+
+        telebot.logger.setLevel(logging.INFO)  # Show bots output in console
 
         self.client: Client = client
         self.user: User | None = None
@@ -202,12 +205,19 @@ class BotCore:
             test=1 if DEBUG else 0,
             source=self.source,
         )
-
-        self.telegram_bot.send_message(self.message.chat.id, self.answer)
-        self.answer = None
+        try:
+            self.telegram_bot.send_message(self.message.chat.id, self.answer)
+            self.answer = None
+        except telebot.apihelper.ApiTelegramException as e:
+            if e.result.status_code == 429:
+                print(f"Rate limit hit: retry after {e.result.json()['parameters']['retry_after']} seconds")
+            else:
+                raise
+        except Exception as e:
+            print(f"Error general en cmd_start: {e}")
 
     def start(self) -> None:
-        self.telegram_bot.infinity_polling()
+        self.telegram_bot.infinity_polling(timeout=60, long_polling_timeout=60)
 
     def stop(self) -> None:
         self.telegram_bot.stop_polling()
