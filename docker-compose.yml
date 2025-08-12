@@ -10,7 +10,7 @@ services:
       - ./data/Dropbox:/root/Dropbox
       - ./staticfiles:/app/staticfiles 
     restart: always
-    command: gunicorn --bind 0.0.0.0:8081 idsa.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8081 --capture-output --log-level info idsa.wsgi:application
     networks:
       - main
 

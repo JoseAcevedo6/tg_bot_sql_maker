@@ -24,6 +24,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from app_bot.models import Client, Log, User
 from idsa.settings import DEBUG
 
+logger = logging.getLogger(__name__)
+telebot.logger.setLevel(logging.INFO)  # Show bots output in console
+
 P = ParamSpec("P")
 R = TypeVar("R")
 
@@ -48,8 +51,6 @@ def ensure_db_connection(func: Callable[P, R]) -> Callable[P, R]:
 class BotCore:
 
     def __init__(self, client: Client):
-
-        telebot.logger.setLevel(logging.INFO)  # Show bots output in console
 
         self.client: Client = client
         self.user: User | None = None
@@ -206,16 +207,16 @@ class BotCore:
             source=self.source,
         )
         try:
-            print(f"Enviando respuesta al usuario {self.message.from_user.id}: {self.answer}")  # Debugging output
+            logger.info(f"Enviando respuesta al usuario {self.message.from_user.id}: {self.answer}")  # Debugging output
             self.telegram_bot.send_message(self.message.chat.id, self.answer)
             self.answer = None
         except telebot.apihelper.ApiTelegramException as e:
             if e.result.status_code == 429:
-                print(f"Rate limit hit: retry after {e.result.json()['parameters']['retry_after']} seconds")
+                logger.info(f"Rate limit hit: retry after {e.result.json()['parameters']['retry_after']} seconds")
             else:
                 raise
         except Exception as e:
-            print(f"Error general en cmd_start: {e}")
+            logger.info(f"Error general en cmd_start: {e}")
 
     def start(self) -> None:
         self.telegram_bot.infinity_polling(timeout=60, long_polling_timeout=60)
